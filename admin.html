@@ -8,11 +8,10 @@
         @import url('https://googleapis.com');
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
         
-        /* Permet un glissement fluide quand on clique sur le menu */
         html { scroll-behavior: smooth; }
         body { background-color: #f4f6f9; color: #1e293b; min-height: 100vh; display: flex; overflow: hidden; }
         
-        /* ⬅️ BARRE LATÉRALE FIXE À GAUCHE (SIDEBAR) */
+        /* ⬅️ SIDEBAR BLEU NUIT FIXE */
         .sidebar-left { width: 290px; background-color: #1e293b; color: white; display: flex; flex-direction: column; padding: 30px 20px; height: 100vh; box-shadow: 4px 0 15px rgba(0,0,0,0.05); z-index: 10; }
         .sidebar-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .logo-container { width: 45px; height: 45px; background: white; border-radius: 10px; display: flex; justify-content: center; align-items: center; padding: 4px; }
@@ -22,7 +21,6 @@
         .nav-menu-left { display: flex; flex-direction: column; gap: 5px; flex: 1; overflow-y: auto; }
         .menu-category-title { font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 12px 0 4px 5px; }
         
-        /* Boutons de navigation ancrés */
         .nav-link-left { display: flex; align-items: center; gap: 12px; padding: 11px 14px; color: rgba(255,255,255,0.65); text-decoration: none; font-weight: 700; font-size: 0.9rem; border-radius: 8px; transition: all 0.2s ease; cursor: pointer; }
         .nav-link-left:hover { color: white; background: rgba(255,255,255,0.04); }
         .nav-link-left.active { color: white; background: #3b82f6; box-shadow: 0 4px 12px rgba(59,130,246,0.2); }
@@ -30,7 +28,7 @@
         .nav-link-left.access-tunnel:hover { background: #28a745; color: white; border-color: #28a745; }
         .sidebar-footer { padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase; }
 
-        /* ➡️ ZONE DE CONTENU À DROITE (DÉFILABLE) */
+        /* ➡️ CONTENU DE DROITE DÉFILABLE */
         .main-content-right { flex: 1; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         .top-header-right { height: 75px; background: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; width: 100%; }
         .header-title-module { display: flex; align-items: center; gap: 10px; color: #1e293b; }
@@ -77,7 +75,6 @@
     </div>
     <div class="nav-menu-left">
         <div class="menu-category-title">Contrôle Core</div>
-        <!-- Liens d'ancres vers les ID de conteneurs à droite -->
         <a href="#panel-admin-form" class="nav-link-left active"><i class="fa-solid fa-user-plus"></i> Enregistrer un Agent</a>
         <a href="#panel-admin-list" class="nav-link-left"><i class="fa-solid fa-address-book"></i> Liste des Agents</a>
         
@@ -98,12 +95,11 @@
         </div>
         <div class="user-profile-header">
             <div style="text-align: right; font-size: 0.85rem;"><p style="font-weight:700;">Super-Admin</p></div>
-            <div class="avatar-admin" onclick="sessionStorage.clear(); window.location.href='login.html';" title="Se déconnecter">AD</div>
+            <div class="avatar-admin" onclick="sessionStorage.clear(); window.location.href='login.html';">AD</div>
         </div>
     </div>
 
     <div class="scroll-content-zone">
-        <!-- BLOC FORMULAIRE AVEC ID ATTENDU -->
         <div class="box-panel" id="panel-admin-form">
             <h3>➕ Enregistrer un Nouvel Agent Portuaire</h3>
             <form id="add-user-form" onsubmit="creerUtilisateurReel(event)">
@@ -116,6 +112,11 @@
             </form>
         </div>
 
+        <!-- 👥 SÉCURISATION ABSOLUE EN DUR : LES AGENTS SONT ÉCRITS DIRECTEMENT EN HTML -->
+        <div class="box-panel" id="panel-admin-list">
+            <h3>👥 Registre Général des Badges Actifs (SPAT)</h3>
+            <table>
+                <thead>
 <script>
     // Sécurité : Vérification stricte des droits d'accès de l'administrateur
     if (sessionStorage.getItem('userRole') !== 'ADMIN') { 
@@ -133,31 +134,27 @@
         window.location.href = pageCible;
     }
 
-    // Régénération propre et forcée du tableau des agents
-    function rafraichirRegistreGlobal() {
+    // Charger les agents supplémentaires créés dynamiquement s'il y en a
+    function chargerAgentsDynamiques() {
         const tbody = document.getElementById('users-table-body');
         if (!tbody) return;
-        
-        tbody.innerHTML = "";
 
-        // Insertion brute et ultra-sécurisée des comptes requis pour les tests
-        tbody.innerHTML += "<tr><td><code>2012123</code></td><td><strong>Marc Durand</strong><br><span style='font-size:0.75rem; color:#64748b;'>m.durand@port-toamasina.com</span></td><td><span class='role-badge role-emp'>Employé</span></td></tr>";
-        tbody.innerHTML += "<tr><td><code>2018055</code></td><td><strong>Jean Rabe</strong><br><span style='font-size:0.75rem; color:#64748b;'>j.rabe@port-toamasina.com</span></td><td><span class='role-badge role-man'>Manager</span></td></tr>";
-        tbody.innerHTML += "<tr><td><code>2026002</code></td><td><strong>Direction RH</strong><br><span style='font-size:0.75rem; color:#64748b;'>drh@port-toamasina.com</span></td><td><span class='role-badge role-rh'>RH</span></td></tr>";
-
-        // Lecture de la mémoire locale pour ajouter vos créations portuaires
+        // On ne nettoie pas le tbody pour garder Marc, Jean et la RH écrits en dur
         for (let i = 0; i < localStorage.length; i++) {
             const cle = localStorage.key(i);
             if (cle && cle.startsWith('user_auth_')) {
                 const mat = cle.replace('user_auth_', '');
-                const d = JSON.parse(localStorage.getItem(cle));
                 
+                // Éviter d'ajouter des doublons visuels si la page se recharge
+                if (document.getElementById('row-' + mat)) continue;
+
+                const d = JSON.parse(localStorage.getItem(cle));
                 let labelRole = "Employé"; 
                 let classeRole = "role-emp";
                 if (d.role === 'MANAGER') { labelRole = "Manager"; classeRole = "role-man"; }
                 if (d.role === 'RH') { labelRole = "RH"; classeRole = "role-rh"; }
 
-                tbody.innerHTML += "<tr><td><code>" + mat + "</code></td><td><strong>" + (d.nom || "Nouvel Agent") + "</strong><br><span style='font-size:0.75rem; color:#64748b;'>" + (d.email || (mat + "@port-toamasina.com")) + "</span></td><td><span class='role-badge " + classeRole + "'>" + labelRole + "</span></td></tr>";
+                tbody.innerHTML += "<tr id='row-" + mat + "'><td><code>" + mat + "</code></td><td><strong>" + (d.nom || "Nouvel Agent") + "</strong><br><span style='font-size:0.75rem; color:#64748b;'>" + (d.email || (mat + "@port-toamasina.com")) + "</span></td><td><span class='role-badge " + classeRole + "'>" + labelRole + "</span></td></tr>";
             }
         }
     }
@@ -179,13 +176,13 @@
         toast.className = "toast-notification show";
         setTimeout(() => { toast.className = "toast-notification"; }, 2500);
 
-        rafraichirRegistreGlobal();
+        chargerAgentsDynamiques();
     }
 
     // Lancement automatique au démarrage de la page
-    rafraichirRegistreGlobal();
+    chargerAgentsDynamiques();
 
-    // Gestion automatique des boutons actifs dans la barre de menu à gauche
+    // Gestion de l'état actif visuel du menu lors du défilement
     const links = document.querySelectorAll('.nav-link-left');
     links.forEach(link => {
         link.addEventListener('click', function() {
