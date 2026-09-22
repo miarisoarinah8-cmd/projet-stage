@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Employé - Demande de Congés - SPAT</title>
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <style>
+        @import url('https://googleapis.com');
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: #f4f6f9; margin: 0; padding: 0; color: #1e293b; min-height: 100vh; position: relative; }
+        .navbar { background-color: #0d3b66; padding: 15px 40px; color: white; font-weight: bold; font-size: 1.2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .tabs-nav { display: flex; gap: 15px; }
+        .tab-btn { background: transparent; border: none; color: rgba(255,255,255,0.7); padding: 10px 20px; font-weight: 700; font-size: 0.95rem; cursor: pointer; text-decoration: none; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+        .tab-btn:hover { color: white; background: rgba(255,255,255,0.08); }
+        .tab-btn.active { color: white; background: #28a745; box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2); }
+        .avatar { width: 44px; height: 44px; background: white; color: #0d3b66; font-weight: 700; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 2px solid white; text-transform: uppercase; cursor: pointer; }
+        .container { max-width: 700px; margin: 40px auto; padding: 0 20px; }
+        .box-panel { background: white; padding: 30px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 25px; }
+        .agent-header-info { background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #edf2f7; margin-bottom: 25px; }
+        .agent-header-info h4 { color: #0f172a; font-size: 1.1rem; margin-bottom: 4px; }
+        .agent-header-info p { color: #64748b; font-size: 0.85rem; font-weight: 500; }
+        h3 { font-size: 1.3rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; border-bottom: 1px solid #edf2f7; padding-bottom: 10px; }
+        .sub-txt { font-size: 0.9rem; color: #64748b; margin-bottom: 25px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 8px; text-transform: uppercase; }
+        .form-group input, .form-group select { width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; background: white; }
+        .btn-submit { background: #28a745; color: white; border: none; padding: 15px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 1rem; width: 100%; box-shadow: 0 4px 12px rgba(40,167,69,0.15); }
+        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9; }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { font-weight: 600; color: #475569; font-size: 0.95rem; }
+        .status-badge { padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; display: inline-block; }
+        .bg-success { background-color: #d4edda; color: #155724; }
+        .bg-danger { background-color: #f8d7da; color: #721c24; }
+        .bg-waiting { background-color: #e0f2fe; color: #0369a1; }
+        .bg-neutral { background-color: #f1f5f9; color: #475569; }
+        .toast-notification { position: fixed; top: -150px; left: 50%; transform: translateX(-50%); background: #198754; color: #ffffff; padding: 20px 40px; border-radius: 16px; box-shadow: 0 20px 40px rgba(25, 135, 84, 0.4); border: 2px solid #20c997; display: flex; align-items: center; gap: 18px; font-weight: 700; font-size: 1.1rem; z-index: 99999; transition: top 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-align: center; min-width: 450px; justify-content: center; }
+        .toast-notification.show { top: 35px; }
+        .toast-notification i { font-size: 1.6rem; animation: pulseIcon 1.5s infinite; }
+        @keyframes pulseIcon { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+<div id="premium-toast" class="toast-notification"><i class="fa-solid fa-square-check"></i><span id="toast-message">Demande transmise avec succès aux RH de la SPAT !</span></div>
+<div class="navbar">
+    <div class="tabs-nav">
+        <a href="index.html" class="tab-btn"><i class="fa-solid fa-clock"></i> 🕒 Pointage Quai</a>
+        <a href="choix_conges.html" class="tab-btn active"><i class="fa-solid fa-calendar-days"></i> 📅 Demande de Congé</a>
+    </div>
+    <div class="avatar" id="avatar-initials" onclick="sessionStorage.clear(); window.location.href='login.html';">--</div>
+</div>
+<div class="container">
+    <div class="box-panel">
+        <h3>Formulaire de Demande de Congé</h3>
+        <p class="sub-txt">Soumettez votre demande d'absence à la Direction Général de la SPAT.</p>
+        <div class="agent-header-info">
+            <h4 id="session-nom">Chargement...</h4>
+            <p id="session-matricule">Matricule : --</p>
+        </div>
+        <form id="leave-form" onsubmit="envoyerDemandeCongeReelle(event)">
+            <div class="form-group">
+                <label>Nature du Congé demandé</label>
+                <select id="leave-type" required><option value="Congé Annuel">Congé Annuel Payé</option><option value="Permission Exceptionnelle">Permission Exceptionnelle Absences</option><option value="Maladie / Convalescence">Congé de Maladie / Justifié</option></select>
+            </div>
+            <div class="form-group"><label>Date de Début</label><input type="date" id="leave-start" required></div>
+            <div class="form-group"><label>Date de Fin</label><input type="date" id="leave-end" required></div>
+            <button type="submit" class="btn-submit">🚀 Soumettre ma demande à la RH</button>
+        </form>
+    </div>
+    <div class="box-panel">
+        <h3>📋 Suivi de mon Statut Personnel</h3>
+        <div class="info-row"><span class="info-label">🕒 Pointage de ce matin :</span><span id="statut-pointage-display" class="status-badge bg-neutral">Non enregistré</span></div>
+        <div class="info-row"><span class="info-label">📅 État de mon congé RH :</span><span id="statut-conge-display" class="status-badge bg-neutral">Aucun dossier</span></div>
+    </div>
+</div>
+<script>
+    const activeRole = sessionStorage.getItem('userRole'); const activeMatricule = sessionStorage.getItem('userMatricule');
+    if (!activeRole || !activeMatricule) { window.location.href = 'login.html'; }
+    let activeNom = "Agent SPAT"; let sessionUserKey = activeMatricule;
+    if (activeMatricule === '2012123') { activeNom = "Marc Durand"; sessionUserKey = "Marc"; }
+    else if (activeMatricule === '2018055') { activeNom = "Jean Rabe"; sessionUserKey = "Jean"; }
+    else { const c = localStorage.getItem('user_auth_' + activeMatricule); if (c) { activeNom = JSON.parse(c).nom || "Nouvel Agent"; } }
+    document.getElementById('session-nom').innerText = `Agent : ${activeNom}`; document.getElementById('session-matricule').innerText = `Matricule officiel : ${activeMatricule}`;
+    document.getElementById('avatar-initials').innerText = activeNom.substring(0, 2).toUpperCase();
+
+    function lireStatutsPersonnels() {
+        if (localStorage.getItem('employe_a_pointe_' + activeMatricule) === 'oui') {
+            const h = localStorage.getItem('heure_pointage_' + activeMatricule); const s = localStorage.getItem('statut_presence_' + activeMatricule);
+            const b = document.getElementById('statut-pointage-display'); b.innerText = `Validé à ${h} (${s})`; b.className = (s === "En retard") ? "status-badge bg-danger" : "status-badge bg-success";
+        }
+        let dRH = localStorage.getItem('final_status_' + activeMatricule);
+        if (!dRH && activeMatricule === '2012001') dRH = localStorage.getItem('final_status_rakoto');
+        if (!dRH && activeMatricule === '2012123') dRH = localStorage.getItem('final_status_marc');
+        const bC = document.getElementById('statut-conge-display');
+        if (dRH === 'Accepté') { bC.innerText = "🟢 Validé par la DRH"; bC.className = "status-badge bg-success"; }
+        else if (dRH === 'Refusé') { bC.innerText = "🔴 Refusé par la DRH"; bC.className = "status-badge bg-danger"; }
+        else if (localStorage.getItem('demande_envoyee_' + sessionUserKey) === 'oui' || localStorage.getItem('demande_envoyee_' + activeMatricule) === 'oui') { bC.innerText = "🔵 En attente de traitement"; bC.className = "status-badge bg-waiting"; }
+    }
+    function envoyerDemandeCongeReelle(e) {
+        e.preventDefault();
+        localStorage.setItem('demande_envoyee_' + activeMatricule, 'oui'); localStorage.setItem('demande_envoyee_' + sessionUserKey, 'oui');
+        localStorage.setItem('type_' + activeMatricule, document.getElementById('leave-type').value);
+        localStorage.setItem('deb_' + activeMatricule, document.getElementById('leave-start').value); localStorage.setItem('fin_' + activeMatricule, document.getElementById('leave-end').value);
+        const toast = document.getElementById('premium-toast'); toast.className = "toast-notification show";
+        setTimeout(() => { toast.className = "toast-notification"; window.location.reload(); }, 2500);
+    }
+    lireStatutsPersonnels();
+</script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPAT TOAMASINA - Récupération d'Accès</title>
+    <style>
+        @import url('https://googleapis.com');
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: #f8fafc; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        
+        .recovery-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 440px; border: 1px solid #e2e8f0; }
+        .logo-title { font-size: 1.8rem; font-weight: 800; color: #0d3b66; text-align: center; letter-spacing: 1px; margin-bottom: 5px; }
+        .logo-sub { font-size: 0.75rem; text-transform: uppercase; color: #fd7e14; text-align: center; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 25px; }
+        
+        h3 { color: #0f172a; font-size: 1.2rem; margin-bottom: 8px; font-weight: 700; }
+        p { color: #64748b; font-size: 0.9rem; margin-bottom: 25px; line-height: 1.5; }
+        
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #334155; font-size: 0.85rem; }
+        input { width: 100%; padding: 12px 16px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 0.95rem; color: #0f172a; background-color: #f8fafc; }
+        input:focus { border-color: #0d3b66; outline: none; background-color: white; }
+        
+        .btn-send { width: 100%; padding: 14px; background: #0d3b66; color: white; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-bottom: 15px; }
+        .btn-send:hover { background-color: #0a2e52; }
+        
+        .back-to-login { text-align: center; }
+        .back-to-login a { color: #64748b; font-size: 0.85rem; font-weight: 600; text-decoration: none; }
+        .back-to-login a:hover { color: #0d3b66; text-decoration: underline; }
+        
+        .success-box { display: none; background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 20px; border-radius: 10px; color: #166534; font-size: 0.9rem; line-height: 1.6; }
+        .success-box strong { color: #14532d; }
+    </style>
+</head>
+<body>
+
+<div class="recovery-card">
+    <div class="logo-title">SPAT</div>
+    <div class="logo-sub">Port de Toamasina</div>
+
+    <!-- ÉCRAN 1 : Formulaire de demande -->
+    <div id="input-view">
+        <h3>Récupération d'accès système</h3>
+        <p>Saisissez votre adresse email professionnelle unique. L'administrateur système vous transmettra un nouveau mot de passe temporaire.</p>
+        
+        <form id="recoveryForm">
+            <div class="form-group">
+                <label>Adresse Email Enregistrée</label>
+                <input type="email" id="recoveryEmail" required placeholder="nom@port-toamasina.com">
+            </div>
+            <button type="submit" class="btn-send">Générer et envoyer les accès</button>
+        </form>
+    </div>
+
+    <!-- ÉCRAN 2 : Simulation d'envoi réussi (Caché au départ) -->
+    <div id="success-view" class="success-box">
+        <strong>📬 Email de sécurité envoyé !</strong><br>
+        Le serveur de messagerie de la SPAT a généré un code d'accès temporaire unique pour l'adresse <em id="target-email" style="font-weight: 700; color:#0d3b66;"></em>.<br><br>
+        Veuillez consulter votre boîte de réception pour récupérer votre nouveau mot de passe et vous reconnecter.
+    </div>
+
+    <div class="back-to-login" style="margin-top: 20px;">
+        <a href="login.html">⬅️ Retour à l'écran de connexion</a>
+    </div>
+</div>
+
+<script>
+    document.getElementById('recoveryForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const emailTappe = document.getElementById('recoveryEmail').value.trim();
+        
+        // Masquer le formulaire et afficher le bloc de succès interactif
+        document.getElementById('input-view').style.display = 'none';
+        document.getElementById('success-view').style.display = 'block';
+        
+        // Injection dynamique de l'email ciblé
+        document.getElementById('target-email').innerText = emailTappe;
+    });
+</script>
+
+</body>
+</html>

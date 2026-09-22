@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portail RH - SPAT TOAMASINA</title>
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <style>
+        @import url('https://googleapis.com');
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: #f4f6f9; color: #1e293b; min-height: 100vh; display: flex; overflow: hidden; }
+        
+        /* ⬅️ BARRE LATÉRALE FIXE À GAUCHE (SIDEBAR) */
+        .sidebar-left { width: 280px; background-color: #1e293b; color: white; display: flex; flex-direction: column; padding: 30px 20px; height: 100vh; box-shadow: 4px 0 15px rgba(0,0,0,0.05); z-index: 10; }
+        .sidebar-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 35px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .logo-container { width: 45px; height: 45px; background: white; border-radius: 10px; display: flex; justify-content: center; align-items: center; padding: 4px; }
+        .logo-img { width: 100%; height: 100%; object-fit: contain; }
+        .brand-text { font-size: 1.1rem; font-weight: 800; letter-spacing: 0.5px; line-height: 1.2; }
+        .nav-menu-left { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+        .nav-link-left { display: flex; align-items: center; gap: 12px; padding: 14px 16px; color: rgba(255,255,255,0.7); text-decoration: none; font-weight: 700; font-size: 0.95rem; border-radius: 10px; transition: all 0.2s ease; }
+        .nav-link-left:hover { color: white; background: rgba(255,255,255,0.05); }
+        .nav-link-left.active { color: white; background: #28a745; box-shadow: 0 4px 12px rgba(40,167,69,0.25); }
+
+        /* ➡️ CONTENU À DROITE RE-CONÇU */
+        .main-content-right { flex: 1; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* 👑 ZONE DE L'EN-TÊTE ÉQUILIBRÉE QUI COMBLE LE VIDE */
+        .top-header-right { 
+            height: 75px; 
+            background: #ffffff; 
+            border-bottom: 1px solid #e2e8f0; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; /* Aligne le titre à gauche et l'avatar à droite */
+            padding: 0 40px; 
+            width: 100%; 
+        }
+
+        /* 🎨 HABILLEMENT DU VIDE : Fil d'ariane et module actif */
+        .header-title-module { display: flex; align-items: center; gap: 10px; color: #1e293b; }
+        .header-title-module i { color: #28a745; font-size: 1.2rem; }
+        .header-title-module h1 { font-size: 1.1rem; font-weight: 800; letter-spacing: -0.3px; }
+        .breadcrumb-trail { font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+
+        .user-profile-header { display: flex; align-items: center; gap: 12px; }
+        .avatar-rh { width: 42px; height: 42px; background: #28a745; color: white; font-weight: 700; border-radius: 50%; display: flex; justify-content: center; align-items: center; text-transform: uppercase; cursor: pointer; border: 2px solid #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        
+        .scroll-content-zone { flex: 1; padding: 40px; overflow-y: auto; }
+        .box-panel { background: white; padding: 40px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.01); max-width: 800px; }
+        .box-panel h3 { font-size: 1.4rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+        .sub-txt { font-size: 0.95rem; color: #64748b; margin-bottom: 30px; }
+        .section-separator { font-size: 0.85rem; font-weight: 800; color: #28a745; text-transform: uppercase; margin: 30px 0 15px 0; border-bottom: 2px dashed #e2e8f0; padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 10px; text-transform: uppercase; }
+        .form-group input, .form-group select { width: 100%; padding: 14px 16px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.95rem; background: #ffffff; color: #0f172a; }
+        .form-group input:focus, .form-group select:focus { border-color: #28a745; outline: none; }
+        .time-grid-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .btn-save-rules { background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%); color: white; border: none; padding: 16px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 1rem; width: 100%; margin-top: 25px; box-shadow: 0 6px 20px rgba(40,167,69,0.2); }
+
+        .toast-notification { position: fixed; top: -150px; left: 55%; transform: translateX(-50%); background: #198754; color: #ffffff; padding: 20px 40px; border-radius: 16px; box-shadow: 0 20px 40px rgba(25, 135, 84, 0.4); border: 2px solid #20c997; display: flex; align-items: center; gap: 18px; font-weight: 700; font-size: 1.1rem; z-index: 99999; transition: top 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); min-width: 450px; justify-content: center; }
+        .toast-notification.show { top: 35px; }
+    </style>
+</head>
+<body>
+
+<div id="premium-toast" class="toast-notification">
+    <i class="fa-solid fa-shield-halved"></i>
+    <span>Directives de présence enregistrées sur le réseau portuaire !</span>
+</div>
+
+<!-- BARRE LATÉRALE À GAUCHE -->
+<div class="sidebar-left">
+    <div class="sidebar-brand">
+        <div class="logo-container"><img class="logo-img" src="logo_spat.png.jpg" alt="SPAT"></div>
+        <div class="brand-text">SPAT<br><span style="font-size:0.75rem; color:#94a3b8; font-weight:500;">Ressources Humaines</span></div>
+    </div>
+    <div class="nav-menu-left">
+        <a href="dashboard.html" class="nav-link-left active"><i class="fa-solid fa-sliders"></i> Horaires & Règles</a>
+        <a href="dashboard_conges.html" class="nav-link-left"><i class="fa-solid fa-calendar-check"></i> Demandes de Congés</a>
+    </div>
+</div>
+
+<!-- ZONE DE DROITE -->
+<div class="main-content-right">
+    
+    <!-- 👑 HEADER SUPÉRIEUR QUI HABILLE MAINTENANT LE VIDE -->
+    <div class="top-header-right">
+        <!-- Nouveau bloc visuel à gauche du header -->
+        <div>
+            <div class="breadcrumb-trail">Console Générale / Paramètres</div>
+            <div class="header-title-module">
+                <i class="fa-solid fa-business-time"></i>
+                <h1>Régulation Horaires & Temps de Présence</h1>
+            </div>
+        </div>
+        
+        <!-- Bloc utilisateur existant à droite -->
+        <div class="user-profile-header">
+            <div style="text-align: right; font-size: 0.85rem;"><p style="font-weight:700;">Direction RH</p><p style="color:#64748b; font-size:0.75rem;">SPAT Toamasina</p></div>
+            <div class="avatar-rh" onclick="sessionStorage.clear(); window.location.href='login.html';">RH</div>
+        </div>
+    </div>
+
+    <div class="scroll-content-zone">
+        <div class="box-panel">
+            <h3><i class="fa-solid fa-sliders" style="color: #28a745;"></i> Régulation Avancée des Temps de Présence</h3>
+            <p class="sub-txt">Configuration des temps de présence, des tolérances et des quotas pour le personnel portuaire.</p>
+            <form onsubmit="declencherToastRH(event)">
+                <div class="section-separator"><i class="fa-solid fa-clock"></i> 1. Horaires Obligatoires de Pointage</div>
+                <div class="time-grid-row">
+                    <div class="form-group" style="margin-bottom: 0;"><label>Prise de Service (Matin)</label><input type="time" value="08:00" required></div>
+                    <div class="form-group" style="margin-bottom: 0;"><label>Prise de Service (Après-midi)</label><input type="time" value="14:00" required></div>
+                </div>
+                <div class="section-separator"><i class="fa-solid fa-utensils"></i> 2. Régulation de la Pause Déjeuner</div>
+                <div class="time-grid-row">
+                    <div class="form-group" style="margin-bottom: 0;"><label>Début de la Pause (Midi)</label><input type="time" value="12:00" required></div>
+                    <div class="form-group" style="margin-bottom: 0;"><label>Fin de la Pause (Après-midi)</label><input type="time" value="14:00" required></div>
+                </div>
+                <div class="section-separator"><i class="fa-solid fa-triangle-exclamation"></i> 3. Seuils de Retards & Absences</div>
+                <div class="time-grid-row">
+                    <div class="form-group" style="margin-bottom: 0;"><label>Marge de tolérance (Minutes)</label><input type="number" value="15" required></div>
+                    <div class="form-group" style="margin-bottom: 0;"><label>Seuil d'Absence Automatique (Minutes)</label><input type="number" value="60" required></div>
+                </div>
+                <div class="section-separator"><i class="fa-solid fa-business-time"></i> 4. Majorations & Heures Supplémentaires</div>
+                <div class="form-group">
+                    <label>Calcul des Heures Supplémentaires</label>
+                    <select required>
+                        <option value="active">Activer automatiquement après l'heure de sortie</option>
+                        <option value="validation">Soumis à la validation stricte du Manager</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-save-rules">Enregistrer la réglementation portuaire</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    // Sécurité : Vérification stricte des droits d'accès de la DRH
+    if (sessionStorage.getItem('userRole') !== 'RH') { 
+        window.location.href = 'login.html'; 
+    }
+
+    // Gestion de l'affichage du bandeau de confirmation premium
+    function declencherToastRH(e) {
+        e.preventDefault();
+        const toast = document.getElementById('premium-toast');
+        toast.className = "toast-notification show";
+        
+        // Retrait fluide après 2.5 secondes
+        setTimeout(() => { 
+            toast.className = "toast-notification"; 
+        }, 2500);
+    }
+</script>
+</body>
+</html>

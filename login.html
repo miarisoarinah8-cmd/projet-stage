@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPAT TOAMASINA - Portail d'Authentification</title>
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <style>
+        @import url('https://googleapis.com');
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: #0d1527; display: flex; height: 100vh; overflow: hidden; }
+        .login-container { display: flex; width: 100%; height: 100%; }
+        
+        .brand-side { flex: 1.3; background: linear-gradient(135deg, rgba(10, 37, 72, 0.95) 0%, rgba(1, 22, 46, 0.98) 100%), url('https://unsplash.com') no-repeat center center; background-size: cover; color: white; display: flex; flex-direction: column; justify-content: space-between; padding: 60px; border-right: 1px solid rgba(255, 255, 255, 0.05); }
+        .brand-header { display: flex; align-items: center; gap: 18px; }
+        .logo-spat-real-container { width: 90px; height: 90px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 16px; display: flex; justify-content: center; align-items: center; padding: 10px; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2); }
+        .logo-spat-img { width: 100%; height: 100%; object-fit: contain; }
+        .brand-logo { font-size: 2.4rem; font-weight: 800; letter-spacing: 3px; background: linear-gradient(to right, #ffffff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .brand-center { max-width: 520px; }
+        .brand-center h1 { font-size: 2.8rem; font-weight: 800; line-height: 1.2; margin-bottom: 15px; letter-spacing: -0.5px; }
+        .brand-center p { font-size: 1.05rem; font-weight: 300; line-height: 1.6; color: #94a3b8; }
+        .orange-line { height: 4px; width: 60px; background: linear-gradient(to right, #fd7e14, #f97316); margin-top: 25px; border-radius: 2px; }
+        .brand-footer { font-size: 0.85rem; color: #475569; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+        
+        .form-side { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #ffffff; padding: 60px; }
+        .form-wrapper { width: 100%; max-width: 400px; }
+        .form-header h2 { color: #0f172a; font-size: 1.8rem; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.5px; }
+        .form-header p { color: #64748b; font-size: 0.95rem; margin-bottom: 35px; }
+        .form-group { margin-bottom: 24px; }
+        .form-group label { display: block; font-weight: 700; color: #334155; font-size: 0.85rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        /* 🎨 AJUSTEMENT : Conteneur pour icônes intégrées */
+        .input-icon-wrapper { position: relative; display: flex; align-items: center; }
+        .input-icon-wrapper i { position: absolute; left: 16px; color: #94a3b8; font-size: 1.1rem; transition: color 0.2s; }
+        
+        /* 🎨 AJUSTEMENT : Bordures et arrondis adoucis (12px) */
+        .form-group input { width: 100%; padding: 15px 16px 14px 48px; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 0.95rem; color: #0f172a; background-color: #f8fafc; transition: all 0.2s ease; font-weight: 500; }
+        .form-group input:focus { border-color: #0d3b66; outline: none; box-shadow: 0 4px 12px rgba(13, 59, 102, 0.08); background-color: #ffffff; }
+        .input-icon-wrapper input:focus + i { color: #0d3b66; }
+        
+        /* 🎨 AJUSTEMENT : Effet de survol fluide sur le bouton principal */
+        button.btn-login { width: 100%; padding: 16px; background: linear-gradient(135deg, #0d3b66 0%, #072344 100%); color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; margin-top: 15px; box-shadow: 0 4px 14px rgba(13, 59, 102, 0.15); letter-spacing: 0.5px; }
+        button.btn-login:hover { background: linear-gradient(135deg, #072344 0%, #021124 100%); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(13, 59, 102, 0.25); }
+        
+        .error-message { color: #ef4444; background: #fef2f2; border: 1.5px solid #fee2e2; padding: 14px; border-radius: 12px; font-size: 0.9rem; text-align: center; margin-top: 25px; display: none; font-weight: 600; }
+        @media (max-width: 1024px) { .brand-side { display: none; } .form-side { flex: 1; padding: 40px; } }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <div class="brand-side">
+        <div class="brand-header">
+            <div class="logo-spat-real-container"><img class="logo-spat-img" src="logo_spat.png.jpg" alt="SPAT"></div>
+            <div class="brand-logo">SPAT</div>
+        </div>
+        <div class="brand-center">
+            <h1>Société du Port à gestion Autonome de Toamasina</h1>
+            <p>Plateforme sécurisée d'administration des temps de présence, des accès aux quais et des ressources humaines du pôle maritime.</p>
+            <div class="orange-line"></div>
+        </div>
+        <div class="brand-footer">TOAMASINA, MADAGASCAR</div>
+    </div>
+    <div class="form-side">
+        <div class="form-wrapper">
+            <div class="form-header">
+                <h2>Portail d'Authentification</h2>
+                <p>Veuillez renseigner vos identifiants de badge portuaire.</p>
+            </div>
+            <form id="spatMatriculeForm">
+                <div class="form-group">
+                    <label>Numéro Matricule Agent</label>
+                    <div class="input-icon-wrapper">
+                        <!-- 🎨 AJUSTEMENT : Ajout des icônes Font Awesome -->
+                        <input type="text" id="matricule" required placeholder="Ex: 2012123" inputmode="numeric" pattern="[0-9]{7}" maxlength="7">
+                        <i class="fa-solid fa-id-card"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Mot de passe clé</label>
+                    <div class="input-icon-wrapper">
+                        <input type="password" id="password" required placeholder="••••••••">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                </div>
+                <button type="submit" class="btn-login">S'identifier sur le réseau</button>
+            </form>
+            <div class="error-message" id="errorZone">❌ Matricule ou mot de passe de badge incorrect.</div>
+        </div>
+    </div>
+</div>
+<script>
+    document.getElementById('spatMatriculeForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const matricule = document.getElementById('matricule').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const errorZone = document.getElementById('errorZone');
+        errorZone.style.display = 'none';
+        sessionStorage.clear();
+
+        if (matricule === '2026001' && password === 'admin123') {
+            sessionStorage.setItem('userRole', 'ADMIN'); 
+            sessionStorage.setItem('userMatricule', matricule); 
+            window.location.href = 'admin.html'; 
+            return;
+        } else if (matricule === '2026002' && password === 'rh123') {
+            sessionStorage.setItem('userRole', 'RH'); 
+            sessionStorage.setItem('userMatricule', matricule); 
+            window.location.href = 'dashboard.html'; 
+            return;
+        } else if (matricule === '2012123' && password === 'employe123') {
+            sessionStorage.setItem('userRole', 'EMPLOYE'); 
+            sessionStorage.setItem('userMatricule', matricule); 
+            window.location.href = 'index.html'; 
+            return;
+        } else if (matricule === '2018055' && password === 'manager123') {
+            sessionStorage.setItem('userRole', 'MANAGER'); 
+            sessionStorage.setItem('userMatricule', matricule); 
+            window.location.href = 'manager.html'; 
+            return;
+        }
+
+        const compteStocke = localStorage.getItem('user_auth_' + matricule);
+        if (compteStocke) {
+            const d = JSON.parse(compteStocke);
+            if (d.password === password) {
+                sessionStorage.setItem('userRole', d.role); 
+                sessionStorage.setItem('userMatricule', matricule);
+                if (d.role === 'EMPLOYE') window.location.href = 'index.html';
+                if (d.role === 'MANAGER') window.location.href = 'manager.html';
+                if (d.role === 'RH') window.location.href = 'dashboard.html';
+                return;
+            }
+        }
+        errorZone.style.display = 'block';
+    });
+</script>
+</body>
+</html>

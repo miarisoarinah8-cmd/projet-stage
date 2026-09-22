@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portail RH - Congés - SPAT TOAMASINA</title>
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <style>
+        @import url('https://googleapis.com');
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: #f4f6f9; margin: 0; padding: 0; color: #1e293b; min-height: 100vh; display: flex; overflow: hidden; }
+        
+        /* ⬅️ BARRE LATÉRALE FIXE À GAUCHE (SIDEBAR) */
+        .sidebar-left { width: 280px; background-color: #1e293b; color: white; display: flex; flex-direction: column; padding: 30px 20px; height: 100vh; box-shadow: 4px 0 15px rgba(0,0,0,0.05); z-index: 10; }
+        .sidebar-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 35px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .logo-container { width: 45px; height: 45px; background: white; border-radius: 10px; display: flex; justify-content: center; align-items: center; padding: 4px; }
+        .logo-img { width: 100%; height: 100%; object-fit: contain; }
+        .brand-text { font-size: 1.1rem; font-weight: 800; letter-spacing: 0.5px; line-height: 1.2; }
+        .nav-menu-left { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+        .nav-link-left { display: flex; align-items: center; gap: 12px; padding: 14px 16px; color: rgba(255,255,255,0.7); text-decoration: none; font-weight: 700; font-size: 0.95rem; border-radius: 10px; transition: all 0.2s ease; }
+        .nav-link-left:hover { color: white; background: rgba(255,255,255,0.05); }
+        .nav-link-left.active { color: white; background: #28a745; box-shadow: 0 4px 12px rgba(40,167,69,0.25); }
+
+        /* ➡️ CONTENU À DROITE RE-CONÇU */
+        .main-content-right { flex: 1; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* 👑 EN-TÊTE SUPÉRIEUR HARMONISÉ */
+        .top-header-right { 
+            height: 75px; 
+            background: #ffffff; 
+            border-bottom: 1px solid #e2e8f0; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 0 40px; 
+            width: 100%; 
+        }
+
+        /* Habillage de la zone vide supérieure */
+        .header-title-module { display: flex; align-items: center; gap: 10px; color: #1e293b; }
+        .header-title-module i { color: #28a745; font-size: 1.2rem; }
+        .header-title-module h1 { font-size: 1.1rem; font-weight: 800; letter-spacing: -0.3px; }
+        .breadcrumb-trail { font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+
+        .user-profile-header { display: flex; align-items: center; gap: 12px; }
+        .avatar-rh { width: 42px; height: 42px; background: #28a745; color: white; font-weight: 700; border-radius: 50%; display: flex; justify-content: center; align-items: center; text-transform: uppercase; cursor: pointer; border: 2px solid #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        
+        .scroll-content-zone { flex: 1; padding: 40px; overflow-y: auto; }
+        .box-panel { background: white; padding: 40px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.01); max-width: 1000px; }
+        
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #edf2f7; padding-bottom: 12px; }
+        .panel-header h3 { font-size: 1.4rem; font-weight: 800; color: #0f172a; margin: 0; }
+        
+        .btn-action-refresh { background: #f1f5f9; color: #64748b; border: none; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; font-size: 1rem; }
+        .btn-action-refresh:hover { background: #fee2e2; color: #ef4444; }
+
+        /* Tableaux */
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 14px 12px; text-align: left; font-size: 0.9rem; }
+        th { background-color: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; border-bottom: 2px solid #e2e8f0; }
+        td { border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: bold; display: inline-block; }
+        .bg-success { background-color: #d4edda; color: #155724; }
+        .bg-danger { background-color: #f8d7da; color: #721c24; }
+
+        /* Puces de décision */
+        .puce-container { display: flex; gap: 12px; align-items: center; }
+        .puce-action { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s ease; color: white; font-size: 0.9rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .puce-accept { background-color: #28a745; }
+        .puce-accept:hover { background-color: #1e7e34; transform: scale(1.1); }
+        .puce-reject { background-color: #dc3545; }
+        .puce-reject:hover { background-color: #bd2130; transform: scale(1.1); }
+
+        .toast-notification { position: fixed; top: -150px; left: 55%; transform: translateX(-50%); background: #0d3b66; color: #ffffff; padding: 20px 40px; border-radius: 16px; box-shadow: 0 20px 40px rgba(13, 59, 102, 0.4); border: 2px solid #007ecc; display: flex; align-items: center; gap: 18px; font-weight: 700; font-size: 1.1rem; z-index: 99999; transition: top 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-align: center; min-width: 450px; justify-content: center; }
+        .toast-notification.show { top: 35px; }
+        .toast-notification i { font-size: 1.6rem; }
+    </style>
+</head>
+<body>
+
+<div id="premium-toast" class="toast-notification">
+    <i class="fa-solid fa-clipboard-check"></i>
+    <span id="toast-message">Décision enregistrée sur le réseau RH.</span>
+</div>
+
+<!-- ⬅️ BARRE LATÉRALE À GAUCHE -->
+<div class="sidebar-left">
+    <div class="sidebar-brand">
+        <div class="logo-container"><img class="logo-img" src="logo_spat.png.jpg" alt="SPAT"></div>
+        <div class="brand-text">SPAT<br><span style="font-size:0.75rem; color:#94a3b8; font-weight:500;">Ressources Humaines</span></div>
+    </div>
+    <div class="nav-menu-left">
+        <a href="dashboard.html" class="nav-link-left"><i class="fa-solid fa-sliders"></i> Horaires & Règles</a>
+        <a href="dashboard_conges.html" class="nav-link-left active"><i class="fa-solid fa-calendar-check"></i> Demandes de Congés</a>
+    </div>
+</div>
+
+<!-- ➡️ ZONE DE DROITE -->
+<div class="main-content-right">
+    
+    <!-- 👑 HABILLAGE SUPÉRIEUR DE LA ZONE BLANCHE -->
+    <div class="top-header-right">
+        <div>
+            <div class="breadcrumb-trail">Console Générale / Absences</div>
+            <div class="header-title-module">
+                <i class="fa-solid fa-calendar-days"></i>
+                <h1>Gestion & Validation des Congés Personnel</h1>
+            </div>
+        </div>
+        
+        <div class="user-profile-header">
+            <div style="text-align: right; font-size: 0.85rem;"><p style="font-weight:700;">Direction RH</p><p style="color:#64748b; font-size:0.75rem;">SPAT Toamasina</p></div>
+            <div class="avatar-rh" onclick="sessionStorage.clear(); window.location.href='login.html';">RH</div>
+        </div>
+    </div>
+
+    <!-- ZONE DE CONTENU TABLEAU -->
+    <div class="scroll-content-zone">
+        <div class="box-panel">
+            <div class="panel-header">
+                <h3>📋 Demandes de Congés en Attente</h3>
+                <button class="btn-action-refresh" onclick="reinitialiserDemandesUniquement()" title="Réinitialiser les demandes du tableau"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr><th>Matricule</th><th>Collaborateur</th><th>Type</th><th>Période</th><th>Décision</th></tr>
+                </thead>
+                <tbody id="rh-table-body">
+                    <!-- S'alimente automatiquement -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    // Sécurité : Vérification des droits d'accès de la DRH
+    if (sessionStorage.getItem('userRole') !== 'RH') { 
+        window.location.href = 'login.html'; 
+    }
+
+    function scannerEtAfficherDemandes() {
+        const tbody = document.getElementById('rh-table-body');
+        tbody.innerHTML = ""; let aucuneDemande = true;
+        let clesDossiers = ["2012123", "2018055"];
+
+        // Extraction dynamique des nouveaux matricules créés par l'admin
+        for (let i = 0; i < localStorage.length; i++) {
+            const cle = localStorage.key(i);
+            if (cle.startsWith('user_auth_')) {
+                const matAgent = cle.replace('user_auth_', '');
+                if (!clesDossiers.includes(matAgent)) { clesDossiers.push(matAgent); }
+            }
+        }
+
+        clesDossiers.forEach(mat => {
+            if (localStorage.getItem('demande_envoyee_' + mat) === 'oui') {
+                aucuneDemande = false;
+                let nomHTML = "Agent SPAT"; let emailHTML = `${mat}@port-toamasina.com`;
+                let cleStockageStatut = mat;
+
+                if (mat === '2012123') {
+                    nomHTML = "Marc Durand"; emailHTML = "m.durand@port-toamasina.com";
+                    cleStockageStatut = localStorage.getItem('demande_envoyee_Marc') === 'oui' ? 'Marc' : '2012123';
+                } else if (mat === '2018055') {
+                    nomHTML = "Jean Rabe"; emailHTML = "j.rabe@port-toamasina.com";
+                    cleStockageStatut = localStorage.getItem('demande_envoyee_Jean') === 'oui' ? 'Jean' : '2018055';
+                } else {
+                    const compteFichier = localStorage.getItem('user_auth_' + mat);
+                    if (compteFichier) {
+                        const d = JSON.parse(compteFichier); nomHTML = d.nom || "Agent Portuaire"; emailHTML = d.email || `${mat}@port-toamasina.com`;
+                    }
+                }
+
+                const type = localStorage.getItem('type_' + cleStockageStatut) || "Congé Annuel";
+                const deb = localStorage.getItem('deb_' + cleStockageStatut) || "À définir";
+                const fin = localStorage.getItem('fin_' + cleStockageStatut) || "À définir";
+                const decision = localStorage.getItem('final_status_' + cleStockageStatut) || 'En attente';
+
+                let actionColHtml = "";
+                if (decision === 'Accepté') {
+                    actionColHtml = `<span class="status-badge bg-success">🟢 Validé par la DRH</span>`;
+                } else if (decision === 'Refusé') {
+                    actionColHtml = `<span class="status-badge bg-danger">🔴 Refusé par la DRH</span>`;
+                } else {
+                    actionColHtml = `
+                        <div class="puce-container">
+                            <div class="puce-action puce-accept" onclick="traiterConge('${cleStockageStatut}', 'Accepté')" title="Accepter"><i class="fa-solid fa-check"></i></div>
+                            <div class="puce-action puce-reject" onclick="traiterConge('${cleStockageStatut}', 'Refusé')" title="Refuser"><i class="fa-solid fa-xmark"></i></div>
+                        </div>
+                    `;
+                }
+                tbody.innerHTML += `<tr><td><code>${mat}</code></td><td><strong>${nomHTML}</strong><br><span style="font-size:0.75rem; color:#64748b;">${emailHTML}</span></td><td>${type}</td><td>Du ${deb}<br>au ${fin}</td><td>${actionColHtml}</td></tr>`;
+            }
+        });
+        if (aucuneDemande) { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748b; padding:30px;">📭 Aucune demande de congé en attente.</td></tr>`; }
+    }
+
+    function traiterConge(matAgent, decision) {
+        localStorage.setItem('final_status_' + matAgent, decision);
+        if (matAgent === '2012001') localStorage.setItem('final_status_rakoto', decision);
+        if (matAgent === '2012123') localStorage.setItem('final_status_marc', decision);
+        
+        const toast = document.getElementById('premium-toast');
+        document.getElementById('toast-message').innerText = `Matricule ${matAgent} passé au statut : ${decision}`;
+        toast.className = "toast-notification show";
+        setTimeout(() => { toast.className = "toast-notification"; }, 2500);
+
+        scannerEtAfficherDemandes();
+    }
+
+    function reinitialiserDemandesUniquement() {
+        const clesAEffacer = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const cle = localStorage.key(i);
+            if (cle.startsWith('demande_envoyee_') || cle.startsWith('type_') || cle.startsWith('deb_') || cle.startsWith('fin_') || cle.startsWith('final_status_')) { clesAEffacer.push(cle); }
+        }
+        clesAEffacer.forEach(c => localStorage.removeItem(c));
+        window.location.reload();
+    }
+    
+    // Initialisation
+    scannerEtAfficherDemandes();
+</script>
+</body>
+</html>

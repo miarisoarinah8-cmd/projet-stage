@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Console Super-Admin - Liste - SPAT</title>
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <style>
+        @import url('https://googleapis.com');
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: #f4f6f9; color: #1e293b; min-height: 100vh; display: flex; overflow: hidden; }
+        .sidebar-left { width: 290px; background-color: #1e293b; color: white; display: flex; flex-direction: column; padding: 30px 20px; height: 100vh; box-shadow: 4px 0 15px rgba(0,0,0,0.05); }
+        .sidebar-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .logo-container { width: 45px; height: 45px; background: white; border-radius: 10px; display: flex; justify-content: center; align-items: center; padding: 4px; }
+        .logo-img { width: 100%; height: 100%; object-fit: contain; }
+        .brand-text { font-size: 1.1rem; font-weight: 800; letter-spacing: 0.5px; line-height: 1.2; }
+        .nav-menu-left { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+        .menu-category-title { font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 12px 0 4px 5px; }
+        .nav-link-left { display: flex; align-items: center; gap: 12px; padding: 11px 14px; color: rgba(255,255,255,0.65); text-decoration: none; font-weight: 700; font-size: 0.9rem; border-radius: 8px; }
+        .nav-link-left.active { color: white; background: #3b82f6; box-shadow: 0 4px 12px rgba(59,130,246,0.2); }
+        .nav-link-left.access-tunnel { color: #f8fafc; background: rgba(255, 255, 255, 0.03); }
+        .nav-link-left.access-tunnel:hover { background: #28a745; }
+        .sidebar-footer { padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.8rem; color: #64748b; text-transform: uppercase; }
+        .main-content-right { flex: 1; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        .top-header-right { height: 75px; background: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; }
+        .avatar-admin { width: 42px; height: 42px; background: #1e293b; color: white; font-weight: 700; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 2px solid #ffffff; }
+        .scroll-content-zone { flex: 1; padding: 40px; overflow-y: auto; }
+        .box-panel { background: white; padding: 30px; border-radius: 16px; border: 1px solid #e2e8f0; width: 100%; max-width: 850px; }
+        .box-panel h3 { font-size: 1.2rem; font-weight: 800; color: #0f172a; margin-bottom: 20px; border-bottom: 1px solid #edf2f7; padding-bottom: 12px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; font-size: 0.9rem; }
+        th { background-color: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; border-bottom: 2px solid #e2e8f0; }
+        td { border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        .role-badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .role-emp { background: #e0f2fe; color: #0369a1; }
+        .role-man { background: #fef3c7; color: #d97706; }
+        .role-rh { background: #d1fae5; color: #065f46; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-left">
+    <div class="sidebar-brand">
+        <div class="logo-container"><img class="logo-img" src="logo_spat.png.jpg" alt="SPAT"></div>
+        <div class="brand-text">SPAT<br><span style="font-size:0.75rem; color:#94a3b8;">Console Système</span></div>
+    </div>
+    <div class="nav-menu-left">
+        <div class="menu-category-title">Contrôle Core</div>
+        <a href="admin.html" class="nav-link-left"><i class="fa-solid fa-user-plus"></i> Enregistrer un Agent</a>
+        <a href="admin_liste.html" class="nav-link-left active"><i class="fa-solid fa-address-book"></i> Liste des Agents</a>
+        
+        <div class="menu-category-title">Super-Audit des Espaces</div>
+        <a onclick="superDevTunnel('RH', 'dashboard.html')" class="nav-link-left access-tunnel"><i class="fa-solid fa-chart-pie"></i> Portail DRH (Horaires)</a>
+        <a onclick="superDevTunnel('RH', 'dashboard_conges.html')" class="nav-link-left access-tunnel"><i class="fa-solid fa-calendar-days"></i> Portail DRH (Congés)</a>
+        <a onclick="superDevTunnel('MANAGER', 'manager.html')" class="nav-link-left access-tunnel"><i class="fa-solid fa-anchor"></i> Espace Capitainerie</a>
+        <a onclick="superDevTunnel('EMPLOYE', 'index.html')" class="nav-link-left access-tunnel"><i class="fa-solid fa-clock"></i> Borne Pointage Quai</a>
+    </div>
+    <div class="sidebar-footer"><span>Port Toamasina</span></div>
+</div>
+
+<div class="main-content-right">
+    <div class="top-header-right">
+        <div>
+            <div class="breadcrumb-trail">Console Générale / Effectifs</div>
+            <div class="header-title-module"><i class="fa-solid fa-address-book" style="color:#3b82f6; margin-right:10px;"></i><h1>Registre Global des Collaborateurs</h1></div>
+        </div>
+        <div class="avatar-admin" onclick="sessionStorage.clear(); window.location.href='login.html';">AD</div>
+    </div>
+
+    <div class="scroll-content-zone">
+        <div class="box-panel">
+            <h3>👥 Registre Général des Badges Actifs (SPAT)</h3>
+            <table>
+                <thead>
+                    <tr><th>Matricule</th><th>Agent</th><th>Rôle d'Accès</th></tr>
+                </thead>
+                <tbody id="users-table-body">
+                    <!-- Généré proprement par le script -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    if (sessionStorage.getItem('userRole') !== 'ADMIN') { window.location.href = 'login.html'; }
+
+    function superDevTunnel(roleCible, pageCible) {
+        sessionStorage.setItem('userRole', roleCible);
+        if (!sessionStorage.getItem('userMatricule') || sessionStorage.getItem('userMatricule') === '2026001') {
+            if (roleCible === 'RH') sessionStorage.setItem('userMatricule', '2026002');
+            else if (roleCible === 'MANAGER') sessionStorage.setItem('userMatricule', '2018055');
+            else sessionStorage.setItem('userMatricule', '2012123');
+        }
+        window.location.href = pageCible;
+    }
+
+    function rafraichirRegistreGlobal() {
+        const tbody = document.getElementById('users-table-body');
+        tbody.innerHTML = "";
+
+        tbody.innerHTML += "<tr><td><code>2012123</code></td><td><strong>Marc Durand</strong><br><span style='font-size:0.75rem; color:#64748b;'>m.durand@port-toamasina.com</span></td><td><span class='role-badge role-emp'>Employé</span></td></tr>";
+        tbody.innerHTML += "<tr><td><code>2018055</code></td><td><strong>Jean Rabe</strong><br><span style='font-size:0.75rem; color:#64748b;'>j.rabe@port-toamasina.com</span></td><td><span class='role-badge role-man'>Manager</span></td></tr>";
+        tbody.innerHTML += "<tr><td><code>2026002</code></td><td><strong>Direction RH</strong><br><span style='font-size:0.75rem; color:#64748b;'>drh@port-toamasina.com</span></td><td><span class='role-badge role-rh'>RH</span></td></tr>";
+
+        for (let i = 0; i < localStorage.length; i++) {
+            const cle = localStorage.key(i);
+            if (cle && cle.startsWith('user_auth_')) {
+                const mat = cle.replace('user_auth_', '');
+                const d = JSON.parse(localStorage.getItem(cle));
+                let labelRole = "Employé"; let classeRole = "role-emp";
+                if (d.role === 'MANAGER') { labelRole = "Manager"; classeRole = "role-man"; }
+                if (d.role === 'RH') { labelRole = "RH"; classeRole = "role-rh"; }
+                tbody.innerHTML += "<tr><td><code>" + mat + "</code></td><td><strong>" + (d.nom || "Nouvel Agent") + "</strong><br><span style='font-size:0.75rem; color:#64748b;'>" + (d.email || (mat + "@port-toamasina.com")) + "</span></td><td><span class='role-badge " + classeRole + "'>" + labelRole + "</span></td></tr>";
+            }
+        }
+    }
+    rafraichirRegistreGlobal();
+</script>
+</body>
+</html>

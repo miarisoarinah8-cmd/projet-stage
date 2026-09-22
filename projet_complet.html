@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prototype Global - Gestion de Présence</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
+        .main-title { text-align: center; color: #1a202c; margin-bottom: 25px; }
+        
+        /* Grille principale séparant les rôles */
+        .grid-roles { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 900px) { .grid-roles { grid-template-columns: 1fr; } }
+        
+        .role-box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-top: 5px solid #007bff; }
+        .role-box.admin { border-top-color: #6f42c1; }
+        .role-box.rh { border-top-color: #28a745; }
+        .role-box.manager { border-top-color: #fd7e14; }
+        
+        h2 { margin-top: 0; color: #333; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        h3 { color: #555; font-size: 1.1rem; margin-top: 15px; }
+        
+        /* Boutons et formulaires */
+        .btn { background: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 10px; transition: 0.2s; }
+        .btn:hover { opacity: 0.9; }
+        .btn-success { background: #28a745; }
+        .btn-danger { background: #dc3545; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        
+        .form-group { margin-bottom: 12px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; }
+        input, select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        
+        /* Listes et tableaux */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f8f9fa; }
+        
+        .badge { padding: 3px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        .bg-open { background: #e3f2fd; color: #0d47a1; }
+        .bg-approved { background: #d4edda; color: #155724; }
+        .bg-rejected { background: #f8d7da; color: #721c24; }
+        
+        /* Zone de notifications */
+        .live-log { background: #1e1e1e; color: #39ff14; padding: 12px; border-radius: 6px; font-family: monospace; font-size: 0.85rem; margin-top: 20px; max-height: 120px; overflow-y: auto; box-shadow: inset 0 0 10px #000; }
+    </style>
+</head>
+<body>
+
+<h1 class="main-title">💼 Système de Gestion de Présence du Personnel (Simulateur)</h1>
+
+<div class="grid-roles">
+
+    <!-- 1️⃣ ESPACE EMPLOYÉ -->
+    <div class="role-box">
+        <h2>🕒 1. Tâches de l'Employé</h2>
+        
+        <h3>Pointage Quotidien</h3>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn btn-success" onclick="logAction('Employé : Pointage ENTRÉE enregistré à ' + new Date().toLocaleTimeString())">Pointer ENTRÉE</button>
+            <button class="btn btn-danger" onclick="logAction('Employé : Pointage SORTIE enregistré à ' + new Date().toLocaleTimeString())">Pointer SORTIE</button>
+        </div>
+
+        <h3>Faire une Demande de Congé</h3>
+        <form onsubmit="ajouterConge(event)">
+            <div class="form-group">
+                <label>Type :</label>
+                <select id="leaveType"><option>Congé Payé</option><option>Maladie</option></select>
+            </div>
+            <div class="form-group">
+                <label>Début :</label>
+                <input type="date" id="leaveStart" required value="2026-10-05">
+            </div>
+            <button type="submit" class="btn">Soumettre la Demande</button>
+        </form>
+    </div>
+
+    <!-- 2️⃣ ESPACE MANAGER -->
+    <div class="role-box manager">
+        <h2>🗂️ 2. Tâches du Manager</h2>
+        <h3>Validation des Absences & Congés</h3>
+        <p style="font-size:0.85rem; color:#666;">Cliquez pour traiter les demandes en temps réel :</p>
+        <table>
+            <thead>
+                <tr><th>Employé</th><th>Type</th><th>Statut</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="managerTable">
+                <tr id="row1">
+                    <td>Jean Dupont</td>
+                    <td>Congé Payé</td>
+                    <td><span class="badge bg-open" id="status1">En attente</span></td>
+                    <td>
+                        <button class="badge bg-approved" onclick="validerConge(1, 'Accepté')">✔</button>
+                        <button class="badge bg-rejected" onclick="validerConge(1, 'Refusé')">✖</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 3️⃣ ESPACE RESPONSABLE RH -->
+    <div class="role-box rh">
+        <h2>📊 3. Tâches de la RH</h2>
+        <h3>Suivi Global & Statistiques</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: center; margin-bottom: 15px;">
+            <div style="background:#e8f5e8; padding: 10px; border-radius:5px;"><strong>42</strong><br><span style="font-size:0.75rem;">Présents</span></div>
+            <div style="background:#fff3cd; padding: 10px; border-radius:5px;"><strong>3</strong><br><span style="font-size:0.75rem;">Retards</span></div>
+        </div>
+        <button class="btn btn-warning" onclick="logAction('RH : Extraction et téléchargement du rapport de présence (CSV/Excel)')">📥 Exporter le Rapport Journalier</button>
+    </div>
+
+    <!-- 4️⃣ ESPACE ADMINISTRATEUR -->
+    <div class="role-box admin">
+        <h2>⚙️ 4. Tâches de l'Administrateur</h2>
+        <h3>Gestion du Personnel</h3>
+        <form onsubmit="ajouterEmploye(event)">
+            <div class="form-group">
+                <label>Nom & Prénom :</label>
+                <input type="text" id="empName" placeholder="Ex: Marie Curie" required>
+            </div>
+            <div class="form-group">
+                <label>Rôle :</label>
+                <select id="empRole"><option>EMPLOYE</option><option>MANAGER</option><option>RH</option></select>
+            </div>
+            <button type="submit" class="btn" style="background:#6f42c1;">Créer le Compte</button>
+        </form>
+    </div>
+
+</div>
+
+<!-- CONSOLE EN DIRECT -->
+<h3>🖥️ Flux de données en temps réel (Base de données simulée) :</h3>
+<div class="live-log" id="consoleLog">> Système prêt. En attente d'actions...</div>
+
+<script>
+    function logAction(message) {
+        const consoleLog = document.getElementById('consoleLog');
+        consoleLog.innerHTML += "<br>> " + message;
+        consoleLog.scrollTop = consoleLog.scrollHeight;
+    }
+
+    function ajouterConge(e) {
+        e.preventDefault();
+        const type = document.getElementById('leaveType').value;
+        const start = document.getElementById('leaveStart').value;
+        
+        logAction("Employé : Nouvelle demande de " + type + " pour le " + start);
+        
+        const tbody = document.getElementById('managerTable');
+        const newId = Date.now();
+        tbody.innerHTML += `<tr id="row${newId}">
+            <td>Vous (Employé)</td>
+            <td>${type}</td>
+            <td><span class="badge bg-open" id="status${newId}">En attente</span></td>
+            <td>
+                <button class="badge bg-approved" onclick="validerConge(${newId}, 'Accepté')">✔</button>
+                <button class="badge bg-rejected" onclick="validerConge(${newId}, 'Refusé')">✖</button>
+            </td>
+        </tr>`;
+    }
+
+    function validerConge(id, decision) {
+        const statusBadge = document.getElementById('status' + id);
+        statusBadge.innerText = decision;
+        statusBadge.className = "badge " + (decision === 'Accepté' ? 'bg-approved' : 'bg-rejected');
+        logAction("Manager : Décision prise concernant la demande de congé -> " + decision);
+    }
+
+    function ajouterEmploye(e) {
+        e.preventDefault();
+        const name = document.getElementById('empName').value;
+        const role = document.getElementById('empRole').value;
+        logAction("Admin : Nouvel utilisateur enregistré avec succès -> " + name + " (" + role + ")");
+        document.getElementById('empName').value = '';
+    }
+</script>
+
+</body>
+</html>

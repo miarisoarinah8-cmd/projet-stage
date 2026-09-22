@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Borne de Pointage - SPAT TOAMASINA</title>
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <style>
+        @import url('https://googleapis.com');
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: #f4f6f9; display: flex; flex-direction: column; min-height: 100vh; color: #1e293b; }
+        .navbar { background-color: #0d3b66; padding: 15px 40px; color: white; font-weight: bold; font-size: 1.2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .tabs-nav { display: flex; gap: 15px; }
+        .tab-btn { background: transparent; border: none; color: rgba(255,255,255,0.7); padding: 10px 20px; font-weight: 700; font-size: 0.95rem; cursor: pointer; text-decoration: none; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+        .tab-btn:hover { color: white; background: rgba(255,255,255,0.08); }
+        .tab-btn.active { color: white; background: #28a745; box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2); }
+        .avatar { width: 44px; height: 44px; background: white; color: #0d3b66; font-weight: 700; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 2px solid white; text-transform: uppercase; cursor: pointer; }
+        .container { max-width: 550px; margin: 60px auto; padding: 0 20px; width: 100%; }
+        .card-pointage { background: white; padding: 40px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -3px rgba(0,0,0,0.05); text-align: center; }
+        .agent-badge { font-size: 0.9rem; color: #64748b; font-weight: 600; background: #f1f5f9; padding: 6px 14px; border-radius: 20px; display: inline-block; margin-bottom: 20px; }
+        h2 { font-size: 1.8rem; font-weight: 800; color: #0f172a; margin-bottom: 10px; }
+        .sub-txt { font-size: 0.95rem; color: #64748b; margin-bottom: 30px; }
+        .clock-display { font-size: 3.2rem; font-weight: 800; color: #0d3b66; margin-bottom: 35px; letter-spacing: -1px; font-variant-numeric: tabular-nums; }
+        .btn-pointer { width: 100%; padding: 18px; background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%); color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; box-shadow: 0 6px 20px rgba(40,167,69,0.2); transition: all 0.2s; }
+        .btn-pointer:hover { transform: translateY(-1px); }
+        .btn-pointer:disabled { background: #cbd5e1 !important; color: #94a3b8 !important; cursor: not-allowed; box-shadow: none !important; }
+        .success-banner { padding: 16px; border-radius: 12px; margin-top: 25px; display: none; text-align: left; }
+        .success-banner strong { display: block; font-size: 1rem; margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <div class="tabs-nav">
+        <a href="index.html" class="tab-btn active"><i class="fa-solid fa-clock"></i> 🕒 Pointage Quai</a>
+        <a href="choix_conges.html" class="tab-btn"><i class="fa-solid fa-calendar-days"></i> 📅 Demande de Congé</a>
+    </div>
+    <div class="avatar" id="avatar-initials" onclick="sessionStorage.clear(); window.location.href='login.html';">--</div>
+</div>
+<div class="container">
+    <div class="card-pointage">
+        <span class="agent-badge" id="agent-matricule">Matricule : --</span>
+        <h2 id="agent-nom">Chargement...</h2>
+        <p class="sub-txt">Port de Toamasina — Enregistrez votre présence sur le quai.</p>
+        <div class="clock-display" id="live-clock">00:00:00</div>
+        <button class="btn-pointer" id="trigger-pointage" onclick="executerPointageReel()">Enregistrer mon pointage</button>
+        <div class="success-banner" id="ticket-zone"><strong id="ticket-titre">🟢 Pointage validé</strong><span id="ticket-details">Enregistré.</span></div>
+    </div>
+</div>
+<script>
+    const activeRole = sessionStorage.getItem('userRole'); const activeMatricule = sessionStorage.getItem('userMatricule');
+    if (!activeRole || !activeMatricule) { window.location.href = 'login.html'; }
+    let activeNom = "Agent SPAT";
+    if (activeMatricule === '2012123') activeNom = "Marc Durand";
+    else if (activeMatricule === '2018055') activeNom = "Jean Rabe";
+    else { const c = localStorage.getItem('user_auth_' + activeMatricule); if (c) { activeNom = JSON.parse(c).nom || "Nouvel Agent"; } }
+    document.getElementById('agent-matricule').innerText = `Matricule : ${activeMatricule}`;
+    document.getElementById('agent-nom').innerText = activeNom;
+    document.getElementById('avatar-initials').innerText = activeNom.substring(0, 2).toUpperCase();
+
+    function actualiserHorloge() {
+        const maintenant = new Date(); document.getElementById('live-clock').innerText = maintenant.toLocaleTimeString('fr-FR');
+    }
+    setInterval(actualiserHorloge, 1000); actualiserHorloge();
+
+    if (localStorage.getItem('employe_a_pointe_' + activeMatricule) === 'oui') { verrouillerEcranPointage(); }
+
+    function executerPointageReel() {
+        const m = new Date(); const hFormatee = String(m.getHours()).padStart(2,'0') + ':' + String(m.getMinutes()).padStart(2,'0');
+        let sPres = "À l'heure"; if (m.getHours() > 8 || (m.getHours() === 8 && m.getMinutes() > 15)) { sPres = "En retard"; }
+        localStorage.setItem('employe_a_pointe_' + activeMatricule, 'oui'); localStorage.setItem('heure_pointage_' + activeMatricule, hFormatee);
+        localStorage.setItem('statut_presence_' + activeMatricule, sPres); localStorage.setItem('nom_employe_pointe_' + activeMatricule, activeNom);
+        verrouillerEcranPointage();
+    }
+    function verrouillerEcranPointage() {
+        const b = document.getElementById('trigger-pointage'); const t = document.getElementById('ticket-zone'); const d = document.getElementById('ticket-details');
+        const h = localStorage.getItem('heure_pointage_' + activeMatricule); const s = localStorage.getItem('statut_presence_' + activeMatricule);
+        b.disabled = true; b.innerText = "Présence déjà enregistrée"; t.style.display = "block";
+        if (s === "En retard") { t.style.backgroundColor = "#fff3cd"; t.style.color = "#856404"; document.getElementById('ticket-titre').innerText = "⚠️ Retard Signalé"; }
+        else { t.style.backgroundColor = "#d4edda"; t.style.color = "#155724"; document.getElementById('ticket-titre').innerText = "🟢 À l'heure"; }
+        d.innerText = `Validé à ${h}. Profil : ${activeNom}.`;
+    }
+</script>
+</body>
+</html>

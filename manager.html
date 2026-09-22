@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Manager - SPAT TOAMASINA</title>
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <style>
+        @import url('https://googleapis.com');
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: #f4f6f9; margin: 0; padding: 0; color: #1e293b; min-height: 100vh; }
+        .navbar { background-color: #0d3b66; padding: 12px 40px; color: white; font-weight: bold; font-size: 1.2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .profile-container { position: relative; display: inline-block; }
+        .avatar { width: 44px; height: 44px; background: white; color: #0d3b66; font-weight: 700; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 2px solid white; text-transform: uppercase; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 100%; background: white; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); width: 140px; z-index: 1000; overflow: hidden; margin-top: 5px; }
+        .dropdown-item { padding: 12px; font-size: 0.9rem; color: #334155; display: block; font-weight: 600; text-decoration: none; cursor: pointer; }
+        .dropdown-item:hover { background: #f8fafc; color: #dc3545; }
+        .profile-container:hover .dropdown-menu { display: block; }
+        .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; }
+        h2 { color: #0f172a; margin-bottom: 25px; border-bottom: 2px solid #0d3b66; padding-bottom: 10px; font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
+        .manager-info { font-size: 0.95rem; color: #64748b; font-weight: 500; }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; }
+        @media (max-width: 1200px) { .dashboard-grid { grid-template-columns: 1fr; } }
+        .box-panel { background: white; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+        .box-panel h3 { font-size: 1.2rem; font-weight: 700; color: #0f172a; margin-bottom: 20px; border-bottom: 1px solid #edf2f7; padding-bottom: 12px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; font-size: 0.9rem; }
+        th { background-color: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; border-bottom: 2px solid #e2e8f0; }
+        td { border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        .status-badge { padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; display: inline-block; text-align: center; }
+        .bg-ontime { background-color: #d4edda; color: #155724; }
+        .bg-retard { background-color: #fff3cd; color: #856404; }
+        .bg-waiting { background-color: #e0f2fe; color: #0369a1; }
+        .bg-success { background-color: #d4edda; color: #155724; }
+        .bg-danger { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <span>⚓ Direction de la Capitainerie — SPAT</span>
+    <div class="profile-container">
+        <div class="avatar">JR</div>
+        <div class="dropdown-menu"><span class="dropdown-item" onclick="sessionStorage.clear(); window.location.href='login.html';">🚪 Quitter</span></div>
+    </div>
+</div>
+<div class="container">
+    <h2>Tableau de Bord Superviseur <span class="manager-info">Manager : <strong>Jean Rabe</strong> (Matricule: <code>2018055</code>)</span></h2>
+    <div class="dashboard-grid">
+        <!-- VOLET 1 : PRESENCES DU JOUR -->
+        <div class="box-panel">
+            <h3>📊 Registre des Présences Réelles du Jour</h3>
+            <table>
+                <thead><tr><th>Matricule</th><th>Agent</th><th>Heure Pointage</th><th>Statut de présence</th></tr></thead>
+                <tbody id="presence-table-body"></tbody>
+            </table>
+        </div>
+        <!-- VOLET 2 : ETAT DES CONGES -->
+        <div class="box-panel">
+            <h3>📅 État des Demandes de Congés de l'Équipe</h3>
+            <table>
+                <thead><tr><th>Matricule</th><th>Agent</th><th>Type</th><th>Période</th><th>Statut RH</th></tr></thead>
+                <tbody id="manager-conges-body"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    if (sessionStorage.getItem('userRole') !== 'MANAGER') { window.location.href = 'login.html'; }
+
+    // On liste les matricules de l'équipe (les par défaut + les nouveaux créés par l'admin)
+    function recupererMembresEquipe() {
+        let effectif = ["2012123", "2018055"];
+        for (let i = 0; i < localStorage.length; i++) {
+            const c = localStorage.key(i);
+            if (c.startsWith('user_auth_')) {
+                const m = c.replace('user_auth_', '');
+                if (!effectif.includes(m)) effectif.push(m);
+            }
+        }
+        return effectif;
+    }
+
+    function chargerDonnesManager() {
+        const tbodyPres = document.getElementById('presence-table-body');
+        const tbodyConges = document.getElementById('manager-conges-body');
+        tbodyPres.innerHTML = ""; tbodyConges.innerHTML = "";
+        
+        let aucunPointage = true; let aucunConge = true;
+        const equipe = recupererMembresEquipe();
+
+        equipe.forEach(mat => {
+            // Déterminer l'identité
+            let nom = "Agent Portuaire";
+            if (mat === '2012123') nom = "Marc Durand";
+            else if (mat === '2018055') nom = "Jean Rabe (Moi)";
+            else { const cf = localStorage.getItem('user_auth_' + mat); if (cf) nom = JSON.parse(cf).nom || "Nouvel Agent"; }
+
+            // 1. Remplissage des Pointages réels
+            if (localStorage.getItem('employe_a_pointe_' + mat) === 'oui') {
+                aucunPointage = false;
+                const h = localStorage.getItem('heure_pointage_' + mat);
+                const s = localStorage.getItem('statut_presence_' + mat);
+                let badgeP = `<span class="status-badge bg-ontime">🟢 À l'heure</span>`;
+                if (s === "En retard") badgeP = `<span class="status-badge bg-retard">⚠️ En retard</span>`;
+                tbodyPres.innerHTML += `<tr><td><code>${mat}</code></td><td><strong>${nom}</strong></td><td><strong>${h}</strong></td><td>${badgeP}</td></tr>`;
+            }
+
+            // 2. Remplissage des Congés liés
+            let kConges = mat;
+            if (mat === '2012123' && localStorage.getItem('demande_envoyee_Marc') === 'oui') kConges = 'Marc';
+            if (mat === '2018055' && localStorage.getItem('demande_envoyee_Jean') === 'oui') kConges = 'Jean';
+            if (mat === '2012001' && localStorage.getItem('demande_simulee_rakoto') === 'oui') kConges = 'rakoto';
+
+            if (localStorage.getItem('demande_envoyee_' + kConges) === 'oui' || (mat === '2012001' && localStorage.getItem('demande_simulee_rakoto') === 'oui')) {
+                aucunConge = false;
+                const type = localStorage.getItem('type_' + kConges) || "Permission";
+                const deb = localStorage.getItem('deb_' + kConges) || "À définir";
+                const fin = localStorage.getItem('fin_' + kConges) || "À définir";
+                
+                let dec = localStorage.getItem('final_status_' + kConges) || 'En attente';
+                if (!dec && mat === '2012001') dec = localStorage.getItem('final_status_2012001') || 'En attente';
+
+                let badgeC = `<span class="status-badge bg-waiting">🔵 En attente</span>`;
+                if (dec === 'Accepté') badgeC = `<span class="status-badge bg-success">🟢 Validé</span>`;
+                if (dec === 'Refusé') badgeC = `<span class="status-badge bg-danger">🔴 Refusé</span>`;
+
+                tbodyConges.innerHTML += `<tr><td><code>${mat}</code></td><td><strong>${nom}</strong></td><td>${type}</td><td>Du ${deb}<br>au ${fin}</td><td>${badgeC}</td></tr>`;
+            }
+        });
+
+        if (aucunPointage) tbodyPres.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#64748b; padding:20px;">📭 Aucun pointage enregistré pour votre équipe aujourd'hui.</td></tr>`;
+        if (aucunConge) tbodyConges.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748b; padding:20px;">📭 Aucun congé demandé dans votre équipe actuellement.</td></tr>`;
+    }
+
+    chargerDonnesManager();
+</script>
+</body>
+</html>
